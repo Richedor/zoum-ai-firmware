@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 #  setup.sh — Installation complète sur Raspberry Pi Zero 2 W
-#  Raspberry Pi OS Legacy 32-bit (Bullseye)
+#  Compatible Bullseye et Bookworm (32-bit / 64-bit)
 # ============================================================
 set -e
 
@@ -11,15 +11,13 @@ echo "============================================================"
 
 # ── 1. Dépendances système ──────────────────────────────────────────
 echo ""
-echo "[1/5] Installation des dépendances système..."
+echo "[1/6] Installation des dépendances système..."
 sudo apt-get update
 sudo apt-get install -y \
     python3-venv python3-pip python3-dev \
     libopencv-dev python3-opencv \
     libatlas-base-dev \
     libhdf5-dev \
-    libjasper-dev \
-    libqtgui4 libqt4-test \
     cmake build-essential \
     git wget curl
 
