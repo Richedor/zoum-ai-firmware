@@ -4,9 +4,19 @@ Système de détection de fatigue **plug-and-play** pour véhicule, basé sur :
 
 - **Raspberry Pi Zero 2 W** (4 cœurs ARM Cortex-A53)
 - **IMX219 IR** caméra infrarouge, FOV 160°
-- **Raspberry Pi OS Legacy 32-bit** (Bullseye)
+- **Raspberry Pi OS** (Bullseye / Bookworm)
 
 **Aucun ré-entraînement nécessaire** — modèles pré-entraînés téléchargés automatiquement.
+
+## Indicateurs de fatigue
+
+| Indicateur | Méthode | Seuils |
+|---|---|---|
+| **PERCLOS** | % yeux fermés sur 60s glissantes | ≥ 30% warning, ≥ 50% alerte |
+| **Microsommeil** | Fermeture continue des yeux | > 3.5s → alerte immédiate |
+| **Bâillements** | Chute d'intensité zone bouche | ≥ 3 bâillements → warning |
+| **Baissement de regard** | Déviation verticale du visage | > 15% pendant 3s → warning |
+| **Calibration par œil** | Baseline individuelle G/D | Désactive auto un ROI défaillant |
 
 ---
 
@@ -16,25 +26,26 @@ Système de détection de fatigue **plug-and-play** pour véhicule, basé sur :
 Caméra IMX219 IR (160°)
          │
     ┌────▼─────┐
-    │  Capture  │ 640×480 → center-crop 65% → 416×312
+    │  Capture  │ 640×480 → center-crop (Pi: 65%) 
     └────┬─────┘
          │
     ┌────▼──────────────┐
     │ UltraFace (NCNN)  │ 320×240 — détection visage (~1 MB)
     └────┬──────────────┘
          │ bbox visage
-    ┌────▼──────────────┐
-    │ Heuristique ROI   │ zone haute du visage → 2 crops yeux
-    └────┬──────────────┘
+    ┌────▼──────────────────────────────────────┐
+    │ Heuristique ROI  → yeux (G/D) + bouche   │
+    └────┬──────────────────────────────────────┘
          │
-    ┌────▼──────────────┐
-    │  OCEC (ONNX/DNN)  │ 24×40 — classification ouvert/fermé (112 KB)
-    └────┬──────────────┘
-         │ prob_open
-    ┌────▼──────────────┐
-    │ PERCLOS + micro-  │ fenêtre 60s + fermeture continue
-    │ sommeil           │
-    └────┬──────────────┘
+    ┌────▼──────────────┐   ┌──────────────────┐   ┌──────────────────┐
+    │  OCEC (ONNX/DNN)  │   │  Bâillements     │   │  Baissement      │
+    │  ouvert/fermé      │   │  intensité bouche│   │  position Y bbox │
+    └────┬──────────────┘   └────┬─────────────┘   └────┬─────────────┘
+         │                       │                       │
+    ┌────▼───────────────────────▼───────────────────────▼──┐
+    │  PERCLOS + microsommeil + bâillements + regard        │
+    │  → NORMAL / ATTENTION / ALERTE / MICROSOMMEIL         │
+    └────┬──────────────────────────────────────────────────┘
          │
     ┌────▼──────┐
     │  Alerte   │ buzzer GPIO + affichage
@@ -64,32 +75,37 @@ Sur Pi Zero 2 W avec `num_threads=4`, center-crop 65%, inférence 320×240 :
 ### Sur le Raspberry Pi
 
 ```bash
-git clone <ce-repo> ~/fatigue
+git clone https://github.com/Richedor/fatigue.git ~/fatigue
 cd ~/fatigue
 chmod +x setup.sh
-./setup.sh
+./setup.sh     # installe tout + applique le profil Pi automatiquement
 ```
 
-### Installation manuelle
+### Sur PC (test avec webcam)
 
 ```bash
-# 1. Environnement virtuel
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-
-# 2. Dépendances
-pip install numpy opencv-python-headless
-
-# 3. NCNN (optionnel mais recommandé — fallback sur OpenCV DNN)
-pip install ncnn
-
-# 4. Télécharger les modèles
+git clone https://github.com/Richedor/fatigue.git
+cd fatigue
+pip install numpy opencv-python
 python download_models.py
-
-# 5. Lancer
-python main.py
+python apply_profile.py pc     # adapte config.py pour webcam PC
+python main.py --no-buzzer
 ```
+
+### Basculer entre profils
+
+```bash
+python apply_profile.py pi     # Pi Zero 2 W + IMX219 160°
+python apply_profile.py pc     # Webcam PC standard
+```
+
+Paramètres modifiés automatiquement :
+
+| Paramètre | PC | Pi |
+|---|---|---|
+| `CENTER_CROP_RATIO` | 1.0 | 0.65 |
+| `FACE_SCORE_THRESHOLD` | 0.50 | 0.65 |
+| `FACE_MIN_SIZE` | 25 | 40 |
 
 ---
 
@@ -117,7 +133,8 @@ python main.py --source 0 --no-display
 | Touche | Action |
 |--------|--------|
 | `q` / `Esc` | Quitter |
-| `r` | Réinitialiser le PERCLOS |
+| `r` | Réinitialiser PERCLOS + bâillements + regard |
+| `c` | Relancer la calibration |
 
 ---
 
@@ -169,20 +186,24 @@ GND     (pin 6)  ──→ - (masse)
 fatigue/
 ├── main.py              # Pipeline principal
 ├── config.py            # Configuration centralisée
+├── apply_profile.py     # Bascule PC ↔ Pi (modifie config.py)
 ├── camera.py            # Capture caméra + center-crop FOV
 ├── face_detector.py     # UltraFace (NCNN + fallback OpenCV DNN)
 ├── eye_classifier.py    # OCEC classification yeux (OpenCV DNN)
-├── fatigue_monitor.py   # PERCLOS + microsommeil
+├── yawn_detector.py     # Détection bâillements (intensité bouche)
+├── gaze_monitor.py      # Baissement de regard (position bbox)
+├── fatigue_monitor.py   # PERCLOS + microsommeil + alertes
 ├── alert.py             # Alertes GPIO buzzer + console
 ├── download_models.py   # Téléchargement automatique des modèles
+├── debug_eyes.py        # Debug ROI yeux en direct
 ├── setup.sh             # Script d'installation complet (Pi)
-├── convert_ocec.sh      # Conversion OCEC ONNX → NCNN (optionnel)
 ├── requirements.txt     # Dépendances Python
-├── models/              # Modèles téléchargés
+├── models/              # Modèles téléchargés (non commités)
 │   ├── slim_320.param   # UltraFace NCNN
 │   ├── slim_320.bin     # UltraFace NCNN
+│   ├── version-slim-320.onnx  # UltraFace OpenCV DNN
 │   └── ocec_p.onnx      # OCEC yeux
-└── README.md            # Ce fichier
+└── README.md
 ```
 
 ---
@@ -286,9 +307,14 @@ cd ../python && pip install .
 ```
 
 ### Fausses alertes
-- Augmentez `EYE_OPEN_THRESHOLD` (ex: 0.50 → 0.55)
-- Augmentez `PERCLOS_WARN_THRESHOLD` (ex: 0.15 → 0.20)
-- Augmentez `MICROSLEEP_THRESHOLD_SEC` (ex: 1.5 → 2.0)
+- Augmentez `EYE_OPEN_THRESHOLD` (ex: 0.45 → 0.55)
+- Augmentez `PERCLOS_WARN_THRESHOLD` (ex: 0.30 → 0.40)
+- Augmentez `MICROSLEEP_THRESHOLD_SEC` (ex: 3.5 → 4.5)
+
+### Yeux fermés non détectés
+- Diminuez `CALIBRATION_RATIO` (ex: 0.40 → 0.55)
+- Augmentez `CALIBRATION_MAX_THR` (ex: 0.38 → 0.45)
+- Vérifiez les ROI yeux avec `python debug_eyes.py`
 
 ---
 

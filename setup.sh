@@ -25,7 +25,7 @@ sudo apt-get install -y \
 
 # ── 2. Activer la caméra ────────────────────────────────────────────
 echo ""
-echo "[2/5] Vérification de la caméra..."
+echo "[2/6] Vérification de la caméra..."
 if ! grep -q "^start_x=1" /boot/config.txt 2>/dev/null; then
     echo "  ⚠ Caméra peut ne pas être activée."
     echo "  Exécutez : sudo raspi-config → Interface Options → Camera → Enable"
@@ -43,7 +43,7 @@ fi
 
 # ── 3. Environnement Python ─────────────────────────────────────────
 echo ""
-echo "[3/5] Création de l'environnement Python..."
+echo "[3/6] Création de l'environnement Python..."
 cd "$(dirname "$0")"
 
 if [ ! -d ".venv" ]; then
@@ -58,7 +58,7 @@ pip install --upgrade pip setuptools wheel
 
 # ── 4. Packages Python ──────────────────────────────────────────────
 echo ""
-echo "[4/5] Installation des packages Python..."
+echo "[4/6] Installation des packages Python..."
 
 # OpenCV (utiliser le paquet système si disponible, sinon pip)
 pip install numpy
@@ -88,8 +88,13 @@ pip install picamera2 2>/dev/null && echo "  ✓ picamera2 installé" || {
 
 # ── 5. Téléchargement des modèles ──────────────────────────────────
 echo ""
-echo "[5/5] Téléchargement des modèles pré-entraînés..."
+echo "[5/6] Téléchargement des modèles pré-entraînés..."
 python download_models.py
+
+# ── 6. Appliquer le profil Pi ──────────────────────────────────────
+echo ""
+echo "[6/6] Application du profil Pi (config.py)..."
+python apply_profile.py pi
 
 echo ""
 echo "============================================================"
