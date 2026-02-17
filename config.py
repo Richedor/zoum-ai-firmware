@@ -20,7 +20,15 @@ CAMERA_INDEX      = 0            # /dev/video0 ou index caméra
 CAPTURE_WIDTH     = 640          # Résolution de capture
 CAPTURE_HEIGHT    = 480
 CAPTURE_FPS       = 30
-
+# ─── Réglages IMX219 IR (sans filtre IR) ─────────────────────────
+# L'IMX219 IR n'a pas de filtre infrarouge → image rouge/rose.
+# On corrige via le white balance manuel et les gains de couleur.
+# Désactivé sur PC (IR_CAMERA = False).
+IR_CAMERA         = False        # ◄ Pi 160° : True
+IR_AWB_MODE       = 0            # 0 = AWB manuel (Custom)
+IR_COLOUR_GAINS   = (1.4, 2.2)   # (rouge, bleu) — ajuster selon éclairage
+IR_EXPOSURE_TIME   = 30000       # Temps d'exposition max en µs (30ms)
+IR_ANALOGUE_GAIN   = 4.0         # Gain analogique (sensibilité lumière)
 # ─── Correction FOV 160° ────────────────────────────────────────────
 # Center-crop pour réduire la distorsion barrel du grand angle.
 #   Webcam PC standard  → 1.0  (pas de crop)

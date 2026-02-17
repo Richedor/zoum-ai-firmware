@@ -20,6 +20,7 @@ PROFILES = {
     "CENTER_CROP_RATIO": ("1.0", "0.65"),
     "FACE_SCORE_THRESHOLD": ("0.50", "0.65"),
     "FACE_MIN_SIZE": ("25", "40"),
+    "IR_CAMERA": ("False", "True"),
 }
 
 # Commentaires associés pour chaque profil
@@ -46,8 +47,8 @@ def apply_profile(profile: str):
         target_val = val_pi if profile == "pi" else val_pc
         other_val = val_pc if profile == "pi" else val_pi
 
-        # Regex : PARAM = <nombre>  (avec espaces et commentaire optionnel)
-        pattern = rf"^({param}\s*=\s*)[\d.]+(.*)$"
+        # Regex : PARAM = <valeur>  (nombre, bool, avec espaces et commentaire optionnel)
+        pattern = rf"^({param}\s*=\s*)[\w.]+(.*)$"
         match = re.search(pattern, content, re.MULTILINE)
         if match:
             old_line = match.group(0)

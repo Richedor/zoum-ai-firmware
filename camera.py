@@ -4,6 +4,11 @@ Module caméra — capture + center-crop (correction FOV 160°).
 Supporte :
   1. Picamera2 (natif libcamera, recommandé sur Pi)
   2. OpenCV VideoCapture (fallback universel)
+
+Réglages spéciaux pour IMX219 IR (sans filtre IR) :
+  - White balance manuel pour corriger la teinte rouge
+  - Gains de couleur ajustables
+  - Temps d'exposition limité pour éviter le flou
 """
 import cv2
 import numpy as np
@@ -45,12 +50,33 @@ class Camera:
     # ── Initialisation Picamera2 ─────────────────────────────────────
     def _init_picamera2(self):
         self._picam = Picamera2()
+        print(f"[CAM] Caméras détectées : {self._picam.global_camera_info()}")
+
+        # Contrôles caméra
+        controls = {"FrameRate": self.fps}
+
+        # Réglages spécifiques IMX219 IR (sans filtre IR)
+        if getattr(config, 'IR_CAMERA', False):
+            controls.update({
+                "AwbEnable": False,                        # Désactiver AWB auto
+                "AwbMode": config.IR_AWB_MODE,             # Mode manuel
+                "ColourGains": config.IR_COLOUR_GAINS,     # (rouge, bleu)
+                "ExposureTime": config.IR_EXPOSURE_TIME,   # µs max → évite le flou
+                "AnalogueGain": config.IR_ANALOGUE_GAIN,   # Sensibilité
+            })
+            print(f"[CAM] Mode IR activé : gains={config.IR_COLOUR_GAINS}, "
+                  f"expo={config.IR_EXPOSURE_TIME}µs, gain={config.IR_ANALOGUE_GAIN}")
+
         cam_config = self._picam.create_preview_configuration(
             main={"format": "RGB888", "size": (self.cap_w, self.cap_h)},
-            controls={"FrameRate": self.fps},
+            controls=controls,
         )
         self._picam.configure(cam_config)
         self._picam.start()
+
+        # Laisser le capteur se stabiliser
+        import time
+        time.sleep(1.0)
         print(f"[CAM] Picamera2 démarrée : {self.cap_w}x{self.cap_h} @ {self.fps} fps")
 
     # ── Initialisation OpenCV ────────────────────────────────────────
