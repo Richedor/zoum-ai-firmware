@@ -15,7 +15,7 @@ echo "[1/6] Installation des dépendances système..."
 sudo apt-get update
 sudo apt-get install -y \
     python3-venv python3-pip python3-dev \
-    libopencv-dev python3-opencv \
+    libopencv-dev python3-opencv python3-onnx \
     libatlas-base-dev \
     libhdf5-dev \
     cmake build-essential \
