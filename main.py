@@ -45,6 +45,7 @@ from yawn_detector import YawnDetector
 from gaze_monitor import GazeMonitor
 from fatigue_monitor import FatigueMonitor
 from alert import AlertManager
+import stream_server
 
 
 # ─── Couleurs affichage ─────────────────────────────────────────────
@@ -301,6 +302,11 @@ def run(args):
 
     show = args.display and config.SHOW_PREVIEW
 
+    # ── Serveur MJPEG (streaming vidéo distant) ──────────────────
+    mjpeg_srv = None
+    if args.stream:
+        mjpeg_srv = stream_server.start(port=args.stream_port)
+
     # ── Calibration automatique (par œil) ────────────────────────────
     if args.calibration:
         thr_l, thr_r, use_l, use_r = run_calibration(
@@ -454,6 +460,16 @@ def run(args):
                     gaze_mon.reset()
                     print("[MAIN] Recalibration effectuée.")
 
+            # 10. Streaming MJPEG
+            if mjpeg_srv is not None:
+                if show:
+                    stream_server.update_frame(frame)
+                else:
+                    overlay = frame.copy()
+                    draw_overlay(overlay, face_box, prob_left, prob_right,
+                                 calib_info, fatigue, yawn_det, gaze_mon, fps)
+                    stream_server.update_frame(overlay)
+
             # Log périodique console (toutes les 2s environ)
             if frame_count % max(int(fps * 2), 10) == 0 and config.PRINT_FPS:
                 yawn_str = f"  Baill={yawn_det.yawn_count}" if yawn_det.yawn_count > 0 else ""
@@ -463,6 +479,8 @@ def run(args):
     except KeyboardInterrupt:
         print("\n[MAIN] Interruption clavier.")
     finally:
+        if mjpeg_srv:
+            stream_server.stop(mjpeg_srv)
         alert_mgr.cleanup()
         cam.release()
         if show:
@@ -489,6 +507,14 @@ def main():
     parser.add_argument(
         "--no-calibration", dest="calibration", action="store_false",
         help="Désactiver la calibration automatique au démarrage",
+    )
+    parser.add_argument(
+        "--stream", action="store_true",
+        help="Activer le streaming MJPEG (http://<ip>:8080)",
+    )
+    parser.add_argument(
+        "--stream-port", type=int, default=8080,
+        help="Port du serveur MJPEG (défaut: 8080)",
     )
     args = parser.parse_args()
     run(args)
