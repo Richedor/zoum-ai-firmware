@@ -244,6 +244,13 @@ def run(args):
 
             face_box = UltraFaceDetector.largest_face(dets)
 
+            # Debug : afficher les scores si aucun visage retenu
+            if face_box is None and len(dets) > 0 and frame_count % 50 == 0:
+                scores = dets[:, 4] if dets.shape[1] > 4 else []
+                print(f"[DEBUG] {len(dets)} détection(s) rejetée(s), "
+                      f"scores={[f'{s:.2f}' for s in scores]}, "
+                      f"min_size={config.FACE_MIN_SIZE}")
+
             # 3. Head nod
             nod_det.update(face_box, img_h)
 

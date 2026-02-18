@@ -40,9 +40,9 @@ CENTER_CROP_RATIO = 0.65 if _IS_PI else 1.0
 # ─── Inférence visage ───────────────────────────────────────────────
 DETECT_WIDTH         = 320
 DETECT_HEIGHT        = 240
-FACE_SCORE_THRESHOLD = 0.55 if _IS_PI else 0.50
+FACE_SCORE_THRESHOLD = 0.35 if _IS_PI else 0.50   # IR = scores plus bas
 FACE_IOU_THRESHOLD   = 0.3
-FACE_MIN_SIZE        = 35 if _IS_PI else 25
+FACE_MIN_SIZE        = 20 if _IS_PI else 25        # visage plus petit à 70cm + crop
 NUM_THREADS          = 4
 
 # ─── Head Nod (hochement de tête / microsommeil) ────────────────────
