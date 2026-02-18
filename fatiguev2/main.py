@@ -157,7 +157,7 @@ def run_calibration(cam, detector, nod_det, yawn_det, show):
         if face_box is not None:
             nod_det.add_calibration_sample(face_box, img_h)
             mouth = yawn_det.extract_mouth_roi(frame, face_box)
-            yawn_det.add_calibration_sample(mouth)
+            yawn_det.update_baseline(mouth)
 
         if show:
             elapsed = time.time() - t_start
