@@ -18,7 +18,7 @@ _current_frame = None  # JPEG bytes
 _running = False
 
 
-def update_frame(bgr_frame, quality=50):
+def update_frame(bgr_frame, quality=80):
     """Appelé par le pipeline pour mettre à jour la frame diffusée."""
     global _current_frame
     if bgr_frame is None:

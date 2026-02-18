@@ -21,6 +21,9 @@ PROFILES = {
     "FACE_SCORE_THRESHOLD": ("0.50", "0.65"),
     "FACE_MIN_SIZE": ("25", "40"),
     "IR_CAMERA": ("False", "True"),
+    "IR_EXPOSURE_TIME": ("15000", "15000"),
+    "IR_ANALOGUE_GAIN": ("8.0", "8.0"),
+    "IR_SHARPNESS": ("2.0", "2.0"),
 }
 
 # Commentaires associés pour chaque profil

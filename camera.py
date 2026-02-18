@@ -61,11 +61,13 @@ class Camera:
                 "AwbEnable": False,                        # Désactiver AWB auto
                 "AwbMode": config.IR_AWB_MODE,             # Mode manuel
                 "ColourGains": config.IR_COLOUR_GAINS,     # (rouge, bleu)
-                "ExposureTime": config.IR_EXPOSURE_TIME,   # µs max → évite le flou
-                "AnalogueGain": config.IR_ANALOGUE_GAIN,   # Sensibilité
+                "ExposureTime": config.IR_EXPOSURE_TIME,   # µs — court = moins de flou
+                "AnalogueGain": config.IR_ANALOGUE_GAIN,   # Sensibilité ISO
+                "Sharpness": getattr(config, 'IR_SHARPNESS', 2.0),  # Netteté
             })
             print(f"[CAM] Mode IR activé : gains={config.IR_COLOUR_GAINS}, "
-                  f"expo={config.IR_EXPOSURE_TIME}µs, gain={config.IR_ANALOGUE_GAIN}")
+                  f"expo={config.IR_EXPOSURE_TIME}µs, gain={config.IR_ANALOGUE_GAIN}, "
+                  f"sharp={getattr(config, 'IR_SHARPNESS', 2.0)}")
 
         cam_config = self._picam.create_preview_configuration(
             main={"format": "RGB888", "size": (self.cap_w, self.cap_h)},
