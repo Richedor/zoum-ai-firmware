@@ -67,19 +67,9 @@ class Camera:
             print(f"[CAM] Mode IR activé : gains={config.IR_COLOUR_GAINS}, "
                   f"expo={config.IR_EXPOSURE_TIME}µs, gain={config.IR_ANALOGUE_GAIN}")
 
-        # Rotation 180° (IMX219 monté à l'envers)
-        transform = None
-        try:
-            from libcamera import Transform  # type: ignore
-            transform = Transform(hflip=True, vflip=True)   # = rotation 180°
-            print("[CAM] Rotation 180° appliquée (libcamera Transform)")
-        except ImportError:
-            print("[CAM] libcamera indisponible, pas de rotation matérielle")
-
         cam_config = self._picam.create_preview_configuration(
             main={"format": "RGB888", "size": (self.cap_w, self.cap_h)},
             controls=controls,
-            **({"transform": transform} if transform else {}),
         )
         self._picam.configure(cam_config)
         self._picam.start()
