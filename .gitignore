@@ -1,29 +1,5 @@
-# Python
 __pycache__/
 *.pyc
-*.pyo
-*.egg-info/
-dist/
-build/
-
-# Modèles (à télécharger via download_models.py)
-models/*.onnx
-models/*.param
-models/*.bin
-
-# Environnement virtuel
-env/
-venv/
-.venv/
-
-# Logs
+*.jpg
+*.zip
 *.log
-fatigue.log
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-Thumbs.db
-.DS_Store

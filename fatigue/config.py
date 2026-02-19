@@ -24,25 +24,25 @@ CAPTURE_FPS       = 30
 # L'IMX219 IR n'a pas de filtre infrarouge → image rouge/rose.
 # On corrige via le white balance manuel et les gains de couleur.
 # Désactivé sur PC (IR_CAMERA = False).
-IR_CAMERA         = False        # ◄ Pi 160° : True
+IR_CAMERA         = True        # ◄ Pi 160° : True
 IR_AWB_MODE       = 0            # 0 = AWB manuel (Custom)
 IR_COLOUR_GAINS   = (1.4, 2.2)   # (rouge, bleu) — ajuster selon éclairage
-IR_EXPOSURE_TIME   = 30000       # Temps d'exposition en µs (30ms)
-IR_ANALOGUE_GAIN   = 4.0         # Gain analogique
+IR_EXPOSURE_TIME   = 15000       # Temps d'exposition en µs (30ms)
+IR_ANALOGUE_GAIN   = 8.0         # Gain analogique
 # ─── Correction FOV 160° ────────────────────────────────────────────
 # Center-crop pour réduire la distorsion barrel du grand angle.
 #   Webcam PC standard  → 1.0  (pas de crop)
 #   Pi + IMX219 IR 160° → 0.65 (garder 65 % au centre)
-CENTER_CROP_RATIO = 1.0          # ◄ Pi 160° : 0.65
+CENTER_CROP_RATIO = 0.65          # ◄ Pi 160° : 0.65
 
 # ─── Résolution d'inférence ─────────────────────────────────────────
 DETECT_WIDTH  = 320              # Input UltraFace
 DETECT_HEIGHT = 240
 
 # ─── Détection de visage ────────────────────────────────────────────
-FACE_SCORE_THRESHOLD = 0.50      # ◄ Pi 160° : 0.65
+FACE_SCORE_THRESHOLD = 0.65      # ◄ Pi 160° : 0.65
 FACE_IOU_THRESHOLD   = 0.3       # NMS IoU
-FACE_MIN_SIZE        = 25        # ◄ Pi 160° : 40
+FACE_MIN_SIZE        = 40        # ◄ Pi 160° : 40
 NUM_THREADS          = 4         # Threads ncnn (4 cœurs du Zero 2 W)
 
 # ─── Classification yeux (OCEC) ─────────────────────────────────────
