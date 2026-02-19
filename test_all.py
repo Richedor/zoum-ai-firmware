@@ -25,7 +25,9 @@ GPS_NMEA_PORT = "/dev/ttyUSB1"
 GPS_BAUD      = 115200
 _BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
 FATIGUEV2_DIR = os.path.join(_BASE_DIR, "fatiguev2")
-FATIGUE_V1_DIR = os.path.join(_BASE_DIR, "fatigue")   # modules partagés (camera, face_detector, etc.)
+# Modules partagés (camera, face_detector, etc.) : dans fatigue/ ou à la racine
+_fatigue_sub  = os.path.join(_BASE_DIR, "fatigue")
+FATIGUE_V1_DIR = _fatigue_sub if os.path.isdir(_fatigue_sub) else _BASE_DIR
 
 # ──────────────────────────── HELPERS ───────────────────────────
 GREEN  = "\033[92m"
