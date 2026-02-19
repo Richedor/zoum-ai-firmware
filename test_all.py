@@ -24,13 +24,8 @@ GPS_AT_PORT   = "/dev/ttyUSB2"
 GPS_NMEA_PORT = "/dev/ttyUSB1"
 GPS_BAUD      = 115200
 _BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-# Modules partagés (camera, face_detector, etc.) : dans fatigue/ ou à la racine
-_fatigue_sub  = os.path.join(_BASE_DIR, "fatigue")
-FATIGUE_V1_DIR = _fatigue_sub if os.path.isdir(_fatigue_sub) else _BASE_DIR
-# fatiguev2 : soit à côté de test_all.py, soit dans fatigue/fatiguev2/
-_v2_a = os.path.join(_BASE_DIR, "fatiguev2")
-_v2_b = os.path.join(FATIGUE_V1_DIR, "fatiguev2")
-FATIGUEV2_DIR = _v2_a if os.path.isdir(_v2_a) else _v2_b
+# fatigue-lite : dossier autonome avec tous les modules
+FATIGUE_LITE_DIR = os.path.join(_BASE_DIR, "fatigue-lite")
 
 # ──────────────────────────── HELPERS ───────────────────────────
 GREEN  = "\033[92m"
@@ -139,16 +134,14 @@ def test_mq9():
         return None
 
 
-# 4) Détection de fatigue v2 (Caméra + UltraFace + Head Nod + Bâillements)
+# 4) Détection de fatigue (Caméra + UltraFace + Head Nod + Bâillements)
 def test_fatigue():
-    header("4/7 — Détection de fatigue v2 (Head Nod + Bâillements)")
+    header("4/7 — Détection de fatigue (Head Nod + Bâillements)")
     cam = None
     try:
-        # Ajouter au path : v1 d'abord, puis v2 en position 0 (prioritaire)
-        # Ainsi fatiguev2/config.py est trouvé AVANT fatigue/config.py
-        for d in [FATIGUE_V1_DIR, FATIGUEV2_DIR]:
-            if d not in sys.path:
-                sys.path.insert(0, d)
+        # Ajouter fatigue-lite/ au path (dossier autonome)
+        if FATIGUE_LITE_DIR not in sys.path:
+            sys.path.insert(0, FATIGUE_LITE_DIR)
 
         from camera import Camera
         from face_detector import UltraFaceDetector

@@ -4,20 +4,18 @@ Configuration — Fatigue Detection Lite (Head Nod + Yawn).
 Version allégée : pas d'OCEC, pas de PERCLOS.
 Auto-détecte Pi vs PC → plus besoin d'apply_profile.py.
 
-Réutilise les modèles et modules partagés du répertoire parent :
-  camera.py, face_detector.py, yawn_detector.py, alert.py, stream_server.py
+Autonome : tous les modules et modèles sont dans ce répertoire.
 """
 import os
 import platform
 
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.dirname(BASE_DIR)
-MODELS_DIR = os.path.join(PARENT_DIR, "models")
+MODELS_DIR = os.path.join(BASE_DIR, "models")
 
 # ─── Auto-détection plateforme ──────────────────────────────────────
 _IS_PI = platform.machine() in ("armv6l", "armv7l", "aarch64")
 
-# ─── Chemins modèles (partagés avec v1) ─────────────────────────────
+# ─── Chemins modèles ────────────────────────────────────────────────
 ULTRAFACE_PARAM = os.path.join(MODELS_DIR, "slim_320.param")
 ULTRAFACE_BIN   = os.path.join(MODELS_DIR, "slim_320.bin")
 
@@ -46,9 +44,6 @@ FACE_MIN_SIZE        = 20 if _IS_PI else 25        # visage plus petit à 70cm +
 NUM_THREADS          = 4
 
 # ─── Head Nod (hochement de tête / microsommeil) ────────────────────
-# Le conducteur somnolant "pique du nez" : la tête descend rapidement
-# puis remonte (sursaut). C'est un événement dynamique détecté via
-# le décalage vertical du bbox visage par rapport à la baseline.
 NOD_SMOOTH_ALPHA   = 0.35       # Lissage EMA position Y (0=lent, 1=brut)
 NOD_DOWN_THRESHOLD = 0.12       # Déviation min (× hauteur visage) → "tête basse"
 NOD_MIN_DURATION   = 0.3        # Durée min descente pour compter comme nod (s)

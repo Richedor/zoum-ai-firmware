@@ -25,13 +25,10 @@ Usage :
 import sys
 import os
 
-# ── Import path : fatiguev2/ d'abord, parent ensuite ────────────────
+# ── Import path : fatigue-lite/ ─────────────────────────────────────
 _DIR = os.path.dirname(os.path.abspath(__file__))
-_PARENT = os.path.dirname(_DIR)
 if _DIR not in sys.path:
     sys.path.insert(0, _DIR)
-if _PARENT not in sys.path:
-    sys.path.insert(1, _PARENT)
 
 import argparse
 import time
