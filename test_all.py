@@ -24,8 +24,10 @@ GPS_AT_PORT   = "/dev/ttyUSB2"
 GPS_NMEA_PORT = "/dev/ttyUSB1"
 GPS_BAUD      = 115200
 _BASE_DIR     = os.path.dirname(os.path.abspath(__file__))
-# fatigue-lite : dossier autonome avec tous les modules
-FATIGUE_LITE_DIR = os.path.join(_BASE_DIR, "fatigue-lite")
+# fatigue-lite : auto-détection (à côté de test_all.py OU dans fatigue/)
+_fl_a = os.path.join(_BASE_DIR, "fatigue-lite")
+_fl_b = os.path.join(_BASE_DIR, "fatigue", "fatigue-lite")
+FATIGUE_LITE_DIR = _fl_a if os.path.isdir(_fl_a) else _fl_b
 
 # ──────────────────────────── HELPERS ───────────────────────────
 GREEN  = "\033[92m"
