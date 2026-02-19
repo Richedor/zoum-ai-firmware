@@ -655,10 +655,13 @@ def main():
             now = time.time()
 
             # Lire les boutons
+
             btn = None
             try:
                 from drivers import buttons
                 btn = buttons.poll()
+                if btn:
+                    print(f"[DEBUG] Bouton détecté : {btn}")
             except Exception:
                 pass
 
