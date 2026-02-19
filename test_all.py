@@ -7,6 +7,7 @@ test_all.py — Test unifié de tous les périphériques IoT (Pi Zero)
   - GPS    (SIM7600 via AT + NMEA)
   - RFID   (PN532 I2C)
   - OLED   (SSD1306 I2C)
+  - Buzzer (GPIO PWM)
 """
 
 import os
@@ -17,6 +18,8 @@ from datetime import datetime
 # ──────────────────────────── CONFIG ────────────────────────────
 DHT_GPIO      = 4          # board.D4
 GAS_PIN       = 17         # GPIO 17 (DO du MQ-9)
+BUZZER_PIN    = 27         # GPIO 27 (buzzer passif)
+BUZZER_FREQ   = 2000       # Hz
 GPS_AT_PORT   = "/dev/ttyUSB2"
 GPS_NMEA_PORT = "/dev/ttyUSB1"
 GPS_BAUD      = 115200
@@ -51,7 +54,7 @@ def fail(name, detail=""):
 
 # 1) OLED SSD1306
 def test_oled():
-    header("1/6 — OLED SSD1306 (I2C)")
+    header("1/7 — OLED SSD1306 (I2C)")
     try:
         import board
         import adafruit_ssd1306
@@ -79,7 +82,7 @@ def test_oled():
 
 # 2) DHT22
 def test_dht22():
-    header("2/6 — DHT22 (Température / Humidité)")
+    header("2/7 — DHT22 (Température / Humidité)")
     try:
         import board
         import adafruit_dht
@@ -112,7 +115,7 @@ def test_dht22():
 
 # 3) MQ-9 (gaz)
 def test_mq9():
-    header("3/6 — MQ-9 (Capteur de gaz)")
+    header("3/7 — MQ-9 (Capteur de gaz)")
     try:
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)
@@ -133,7 +136,7 @@ def test_mq9():
 
 # 4) Détection de fatigue v2 (Caméra + UltraFace + Head Nod + Bâillements)
 def test_fatigue():
-    header("4/6 — Détection de fatigue v2 (Head Nod + Bâillements)")
+    header("4/7 — Détection de fatigue v2 (Head Nod + Bâillements)")
     cam = None
     try:
         # Ajouter fatiguev2/ puis fatigue/ (modules partagés) au path
@@ -215,7 +218,7 @@ def test_fatigue():
 
 # 5) GPS (SIM7600)
 def test_gps():
-    header("5/6 — GPS (SIM7600 AT + NMEA)")
+    header("5/7 — GPS (SIM7600 AT + NMEA)")
     try:
         import serial
         import pynmea2
@@ -282,7 +285,7 @@ def test_gps():
 
 # 6) RFID PN532
 def test_rfid():
-    header("6/6 — RFID PN532 (I2C)")
+    header("6/7 — RFID PN532 (I2C)")
     try:
         import board
         import busio
@@ -315,6 +318,31 @@ def test_rfid():
     except Exception as e:
         fail("RFID", str(e))
         return None
+
+
+# 7) Buzzer (GPIO PWM)
+def test_buzzer():
+    header("7/7 — Buzzer (GPIO PWM)")
+    try:
+        import RPi.GPIO as GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(BUZZER_PIN, GPIO.OUT)
+
+        pwm = GPIO.PWM(BUZZER_PIN, BUZZER_FREQ)
+
+        # 3 bips courts pour confirmer que ça marche
+        print(f"  {YELLOW}3 bips de test...{RESET}")
+        for i in range(3):
+            pwm.start(50)     # duty cycle 50%
+            time.sleep(0.15)
+            pwm.stop()
+            time.sleep(0.1)
+
+        ok("BUZZER", f"GPIO {BUZZER_PIN} — 3 bips @ {BUZZER_FREQ} Hz")
+        return True
+    except Exception as e:
+        fail("BUZZER", str(e))
+        return False
 
 
 # ──────────────── AFFICHAGE RÉSUMÉ SUR OLED ─────────────────────
@@ -363,6 +391,7 @@ def main():
     fatigue_ok   = test_fatigue()
     gps_info     = test_gps()
     rfid_uid     = test_rfid()
+    buzzer_ok    = test_buzzer()
 
     # --- Résumé console ---
     header("RÉSUMÉ")
