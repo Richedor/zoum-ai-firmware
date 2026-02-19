@@ -141,8 +141,9 @@ def test_fatigue():
     header("4/7 — Détection de fatigue v2 (Head Nod + Bâillements)")
     cam = None
     try:
-        # Ajouter fatiguev2/ puis fatigue/ (modules partagés) au path
-        for d in [FATIGUEV2_DIR, FATIGUE_V1_DIR]:
+        # Ajouter au path : v1 d'abord, puis v2 en position 0 (prioritaire)
+        # Ainsi fatiguev2/config.py est trouvé AVANT fatigue/config.py
+        for d in [FATIGUE_V1_DIR, FATIGUEV2_DIR]:
             if d not in sys.path:
                 sys.path.insert(0, d)
 
