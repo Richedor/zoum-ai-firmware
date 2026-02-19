@@ -1,5 +1,5 @@
 """
-Driver OLED SSD1306 — Affichage 128×64 I2C.
+Driver OLED SSD1306 - Affichage 128x64 I2C.
 
 Écrans contextuels selon l'état de la machine :
   BOOT, READY, AUTH_NFC, ALCOHOL, TRIP_ACTIVE, MENU, WARNING
@@ -80,14 +80,16 @@ def screen_boot(serial: str, version: str = "1.0.0", progress: dict = None):
     _show(img)
 
 
-def screen_ready(driver: str = "—", gps_fix: bool = False, gps_sats: int = 0,
+def screen_ready(driver: str = "-", gps_fix: bool = False, gps_sats: int = 0,
+                    # Remplacer tout tiret long par un tiret simple
+                    driver = driver.replace("—", "-")
                  network: str = "OFFLINE", rssi: int = 0,
                  temp_c: float = None, queue_size: int = 0):
     img, draw, font = _draw()
 
     # Header
     draw.rectangle([(0, 0), (W, 12)], fill=255)
-    draw.text((2, 1), "ZOUM AI — PRET", font=font, fill=0)
+    draw.text((2, 1), "ZOUM AI - PRET", font=font, fill=0)
 
     # Driver
     draw.text((0, 16), f"Chauffeur: {driver[:14]}", font=font, fill=255)
@@ -188,7 +190,7 @@ def screen_alcohol_fail():
 
 
 def screen_trip(speed_kmh: float = 0, gps_fix: bool = False,
-                network: str = "—", queue_size: int = 0,
+                network: str = "-", queue_size: int = 0,
                 fatigue_level: int = 0, elapsed_min: float = 0):
     img, draw, font = _draw()
 
@@ -204,7 +206,7 @@ def screen_trip(speed_kmh: float = 0, gps_fix: bool = False,
 
     # Fatigue
     fat_labels = {0: "OK", 1: "ATTENTION", 2: "ALERTE!"}
-    draw.text((0, 30), f"Fatigue: {fat_labels.get(fatigue_level, '—')}", font=font, fill=255)
+    draw.text((0, 30), f"Fatigue: {fat_labels.get(fatigue_level, '-')}", font=font, fill=255)
 
     # GPS + Net + Queue
     gps_ico = "FIX" if gps_fix else "---"
@@ -258,7 +260,7 @@ def screen_menu(page: int = 0, data: dict = None):
     elif page == 1:  # Sync
         draw.text((0, 16), "-- Sync --", font=font, fill=255)
         draw.text((0, 28), f"Queue: {data.get('queue_size', 0)}", font=font, fill=255)
-        draw.text((0, 38), f"Last: {data.get('last_sync', '—')}", font=font, fill=255)
+        draw.text((0, 38), f"Last: {data.get('last_sync', '-')}", font=font, fill=255)
         draw.text((0, 48), f"Fails: {data.get('sync_fails', 0)}", font=font, fill=255)
 
     elif page == 2:  # GPS
@@ -269,9 +271,9 @@ def screen_menu(page: int = 0, data: dict = None):
 
     elif page == 3:  # Info
         draw.text((0, 16), "-- Info --", font=font, fill=255)
-        draw.text((0, 28), f"Kit: {data.get('serial', '—')}", font=font, fill=255)
-        draw.text((0, 38), f"FW: {data.get('version', '—')}", font=font, fill=255)
-        draw.text((0, 48), f"Up: {data.get('uptime', '—')}", font=font, fill=255)
+        draw.text((0, 28), f"Kit: {data.get('serial', '-')}", font=font, fill=255)
+        draw.text((0, 38), f"FW: {data.get('version', '-')}", font=font, fill=255)
+        draw.text((0, 48), f"Up: {data.get('uptime', '-')}", font=font, fill=255)
 
     draw.text((0, 54), "[M]Next [<]Exit", font=font, fill=255)
     _show(img)
