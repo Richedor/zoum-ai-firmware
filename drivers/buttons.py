@@ -28,7 +28,7 @@ BTN_BACK  = "back"
 DEBOUNCE_MS = 200
 
 
-def init(pin_start: int = 13, pin_stop: int = 13, pin_menu: int = 13, pin_back: int = 13) -> bool:
+def init(pin_start: int = 5, pin_stop: int = 6, pin_menu: int = 13, pin_back: int = 19) -> bool:
     global _gpio, _initialized, _pins
     try:
         print("[BTN][DEBUG] Import RPi.GPIO...")

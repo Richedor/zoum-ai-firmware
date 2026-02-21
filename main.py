@@ -105,8 +105,12 @@ def init_all(args) -> dict:
     # Boutons
     try:
         from drivers import buttons
-        status["BTN"] = buttons.init(config.BTN_START_GPIO, config.BTN_STOP_GPIO,
-                                     config.BTN_MENU_GPIO, config.BTN_BACK_GPIO)
+        status["BTN"] = buttons.init(
+            config.BTN_START_GPIO,
+            config.BTN_STOP_GPIO,
+            config.BTN_MENU_GPIO,
+            config.BTN_BACK_GPIO,
+        )
     except Exception as e:
         print(f"[INIT] BTN: {e}")
         status["BTN"] = False
