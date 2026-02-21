@@ -32,9 +32,12 @@ def init(pin_start: int = 5, pin_stop: int = 6,
          pin_menu: int = 13, pin_back: int = 19) -> bool:
     global _gpio, _initialized, _pins
     try:
+        print("[BTN][DEBUG] Import RPi.GPIO...")
         import RPi.GPIO as GPIO
         _gpio = GPIO
+        print("[BTN][DEBUG] setwarnings(False)")
         _gpio.setwarnings(False)
+        print("[BTN][DEBUG] setmode(BCM)")
         _gpio.setmode(_gpio.BCM)
 
         _pins = {
@@ -45,7 +48,9 @@ def init(pin_start: int = 5, pin_stop: int = 6,
         }
 
         for pin in _pins:
+            print(f"[BTN][DEBUG] setup pin {pin}")
             _gpio.setup(pin, _gpio.IN, pull_up_down=_gpio.PUD_UP)
+            print(f"[BTN][DEBUG] add_event_detect pin {pin}")
             _gpio.add_event_detect(
                 pin, _gpio.FALLING,
                 callback=_on_press,
@@ -58,6 +63,8 @@ def init(pin_start: int = 5, pin_stop: int = 6,
         return True
     except Exception as e:
         print(f"[BTN] Init échoué: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -65,10 +72,12 @@ def _on_press(channel):
     """Callback interrupt sur front descendant."""
     now = time.time()
     if now - _last_press.get(channel, 0) < DEBOUNCE_MS / 1000.0:
+        print(f"[BTN][DEBUG] debounce sur pin {channel}")
         return
     _last_press[channel] = now
     name = _pins.get(channel)
     if name:
+        print(f"[BTN][DEBUG] événement détecté : {name}")
         _event_queue.append((name, now))
 
 
