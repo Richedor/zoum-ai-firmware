@@ -46,6 +46,14 @@ class ApiClient:
         try:
             r = requests.post(url, json=payload, headers=self.headers, timeout=10)
             if 200 <= r.status_code < 300:
+                # Vérifier aussi le champ "ok" dans le body JSON
+                try:
+                    body = r.json()
+                    if isinstance(body, dict) and body.get("ok") is False:
+                        self.consecutive_fails += 1
+                        return False, f"API error: {body.get('code', '?')} — {body.get('message', '')[:200]}"
+                except Exception:
+                    pass
                 self.last_ok_time = time.time()
                 self.consecutive_fails = 0
                 return True, r.text
