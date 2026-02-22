@@ -210,20 +210,33 @@ def build_telemetry_point(state: sm.State) -> dict:
 
 def sync_loop(api: ApiClient, stop_event: threading.Event):
     """Thread : flush la queue vers l'API périodiquement."""
+    cycle = 0
     while not stop_event.is_set():
         try:
             purge_old(config.DB_PATH)
+            pending = queue_size(config.DB_PATH)
             batch = dequeue_batch(config.DB_PATH, limit=config.BATCH_SIZE)
+
+            # Log périodique (toutes les ~30s) ou quand il y a des messages
+            cycle += 1
+            if batch or cycle % 6 == 0:
+                print(f"[SYNC] Queue: {pending} msg | Batch: {len(batch)} | API: {'OK' if api.is_online else 'OFFLINE'}")
+
             if batch:
+                sent_count = 0
                 for rid, endpoint, payload in batch:
                     ok, msg = api.post(endpoint, payload)
                     if ok:
                         mark_sent(config.DB_PATH, [rid])
+                        sent_count += 1
                     else:
+                        print(f"[SYNC] ÉCHEC {endpoint} (id={rid}): {msg}")
                         mark_failed(config.DB_PATH, rid)
                         break  # stop sur erreur
+                if sent_count:
+                    print(f"[SYNC] ✔ {sent_count}/{len(batch)} envoyés")
         except Exception as e:
-            print(f"[SYNC] Erreur: {e}")
+            print(f"[SYNC] Exception: {e}")
 
         stop_event.wait(config.SYNC_INTERVAL_S)
 
@@ -636,6 +649,16 @@ def main():
 
     # Init API client
     api = ApiClient(config.API_BASE_URL, config.KIT_SERIAL, config.KIT_KEY)
+
+    # Test connectivité API au démarrage
+    try:
+        import requests
+        r = requests.get(f"{config.API_BASE_URL}/docs", timeout=5)
+        print(f"[SYNC] API joignable ✔ ({r.status_code})")
+    except Exception as e:
+        print(f"[SYNC] ⚠ API INJOIGNABLE : {e}")
+        print(f"[SYNC]   URL: {config.API_BASE_URL}")
+        print(f"[SYNC]   Les données seront bufferisées localement")
 
     # State machine
     state = sm.State()
